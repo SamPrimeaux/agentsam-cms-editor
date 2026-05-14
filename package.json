@@ -7,7 +7,9 @@
     "dev": "wrangler dev -c wrangler.jsonc",
     "deploy:dry": "wrangler deploy -c wrangler.jsonc --dry-run",
     "deploy": "wrangler deploy -c wrangler.jsonc",
-    "smoke": "python3 scripts/smoke/smoke_endpoints.py"
+    "smoke": "python3 scripts/smoke/smoke_endpoints.py",
+    "build": "node --check src/worker.js",
+    "preview-build": "npm run build && npm run deploy:dry"
   },
   "devDependencies": {
     "wrangler": "^4.91.0"
