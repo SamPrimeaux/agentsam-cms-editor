@@ -1,7 +1,11 @@
+<<<<<<< Updated upstream
 cd /Users/samprimeaux/agentsam-cms-editor
 
 python3 -c 'from pathlib import Path
 README = r"""# Agent Sam CMS Editor
+=======
+# Agent Sam CMS Editor
+>>>>>>> Stashed changes
 
 A standalone, isolated Cloudflare Worker app for building a mini Shopify-style CMS/editor powered by the `agentsam_*` orchestration layer, `cms_*` content system, D1, R2, and OpenAI API-backed Agent Sam workflows.
 
@@ -21,7 +25,11 @@ The app should allow us to:
 - validate workflow safety before promoting patterns into production systems
 - keep all experiments isolated from the main Inner Animal Media app
 
+<<<<<<< Updated upstream
 ## Baseline Concept
+=======
+Baseline concept:
+>>>>>>> Stashed changes
 
 ```txt
 Mini Shopify CMS
@@ -31,6 +39,7 @@ Mini Shopify CMS
 + D1 cms_* and agentsam_* tables
 + R2 assets/artifacts
 + reusable component/template pipeline
+<<<<<<< Updated upstream
 Current Live Worker
 Worker name: agentsam-cms-editor
 Live URL: https://agentsam-cms-editor.meauxbility.workers.dev/
@@ -395,3 +404,5 @@ cd /Users/samprimeaux/agentsam-cms-editor
 git add README.md AGENTSAM_REPO_RULES.md .gitignore docs scripts
 git commit -m "docs: define Agent Sam CMS editor baseline"
 git push
+=======
+>>>>>>> Stashed changes
