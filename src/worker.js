@@ -60,7 +60,7 @@ export default {
     }
 
     if (pathname === "/analytics") {
-      return asset("/analytics.html", request, env);
+      return Response.redirect(new URL("/dashboard/overview", request.url), 307);
     }
 
     if (pathname === "/hash-not-important") {
