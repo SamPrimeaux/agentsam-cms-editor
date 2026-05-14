@@ -1,13 +1,7 @@
-the README, repo rules, .gitignore, and copy the D1 audit report into this isolated repo.
-
-Run this inside:
-
 cd /Users/samprimeaux/agentsam-cms-editor
 
-Then paste:
-
-cat > README.md <<'MD'
-# Agent Sam CMS Editor
+python3 -c 'from pathlib import Path
+README = r"""# Agent Sam CMS Editor
 
 A standalone, isolated Cloudflare Worker app for building a mini Shopify-style CMS/editor powered by the `agentsam_*` orchestration layer, `cms_*` content system, D1, R2, and OpenAI API-backed Agent Sam workflows.
 
@@ -22,12 +16,12 @@ The app should allow us to:
 - edit pages, sections, components, templates, assets, and themes
 - run Agent Sam workflows safely against real CMS data
 - test OpenAI API-powered chat, image, web lookup, and edit flows
-- generate reusable components/templates/assets
-- store reusable outputs in D1/R2
+- generate reusable components, templates, sections, and assets
+- store reusable outputs in D1 and R2
 - validate workflow safety before promoting patterns into production systems
 - keep all experiments isolated from the main Inner Animal Media app
 
-The baseline idea is:
+## Baseline Concept
 
 ```txt
 Mini Shopify CMS
@@ -45,14 +39,11 @@ Git branch: main
 Git auth method: SSH
 Cloudflare Account ID: ede6590ac0d2fb7daf155b35653457b2
 Runtime Bindings
-
-Current known Cloudflare bindings:
-
 D1 database binding:
   DB → inneranimalmedia-business
 
 R2 bucket binding:
-  DASHBOARD → agent-sam
+  DASHBOARD → cms
 
 Worker secrets:
   OPENAI_API_KEY
@@ -68,19 +59,17 @@ Total matching tables: 113
 agentsam_* tables:    86
 cms_* tables:         27
 
-The app is intentionally built around two major database families:
+The app is intentionally built around two major database families.
 
 agentsam_*
 
-The orchestration/runtime layer for Agent Sam.
-
-Used for:
+The orchestration/runtime layer for Agent Sam:
 
 workflows
-workflow nodes/edges/runs
+workflow nodes, edges, and runs
 plans and tasks
 model catalog and routing
-prompt versions/routes/cache keys
+prompt versions, routes, and cache keys
 command/tool execution
 approvals and guardrails
 evals and health metrics
@@ -89,9 +78,7 @@ artifacts and memory
 workspace state
 cms_*
 
-The content/theme/editor layer.
-
-Used for:
+The content/theme/editor layer:
 
 pages
 sections
@@ -106,7 +93,7 @@ rollbacks
 conversions
 global settings
 tenant/site content
-Core Product Goals
+Product Goals
 1. Visual CMS Editor
 
 The editor should support:
@@ -144,7 +131,7 @@ Workflows should be able to inspect, generate, patch, deploy, smoke test, and re
 
 4. Reusable Component/Template System
 
-Any useful output should be easy to repurpose later:
+Useful outputs should be easy to repurpose later:
 
 sections
 page templates
@@ -219,7 +206,7 @@ D1 binding DB
 R2 binding DASHBOARD
 compatibility date
 non-secret vars only
-Phase 3 — Add OpenAI-safe API route
+Phase 3 — Add OpenAI-safe API routes
 
 Add Worker API routes:
 
@@ -301,12 +288,11 @@ Worker secrets have been uploaded in Cloudflare:
 OPENAI_API_KEY
 CLOUDFLARE_API_TOKEN
 D1/R2 bindings exist in Cloudflare dashboard.
+R2 binding is now DASHBOARD → cms.
 Next safe step: add docs/config, then import/snapshot the current live editor before pushing deployable Worker code.
-MD
+"""
 
-cat > AGENTSAM_REPO_RULES.md <<'MD'
-
-Agent Sam Repo Rules
+RULES = r"""# Agent Sam Repo Rules
 
 This repository is an isolated sandbox for the agentsam-cms-editor Cloudflare Worker.
 
@@ -329,7 +315,7 @@ Live URL: https://agentsam-cms-editor.meauxbility.workers.dev/
 D1 binding: DB
 D1 database: inneranimalmedia-business
 R2 binding: DASHBOARD
-R2 bucket: agent-sam
+R2 bucket: cms
 Deployment Warning
 
 This repo is connected to Cloudflare Builds on main.
@@ -337,12 +323,9 @@ This repo is connected to Cloudflare Builds on main.
 Do not push placeholder Worker code that could overwrite the currently working CMS editor.
 
 First import/snapshot the live editor, then add deployable code.
-MD
+"""
 
-cat > .gitignore <<'EOF'
-
-dependencies
-
+GITIGNORE = r"""# dependencies
 node_modules/
 
 env / secrets
@@ -376,49 +359,39 @@ OS/editor
 .DS_Store
 .vscode/
 .idea/
-EOF
+"""
 
-mkdir -p docs/d1 docs/workflows artifacts
+Path("README.md").write_text(README, encoding="utf-8")
+Path("AGENTSAM_REPO_RULES.md").write_text(RULES, encoding="utf-8")
+Path(".gitignore").write_text(GITIGNORE, encoding="utf-8")
+
+for d in ["docs/d1", "docs/workflows", "scripts/audit", "scripts/build", "scripts/deploy", "scripts/smoke", "artifacts"]:
+Path(d).mkdir(parents=True, exist_ok=True)
+
+print("WROTE README.md")
+print("WROTE AGENTSAM_REPO_RULES.md")
+print("WROTE .gitignore")
+print("CREATED docs/scripts/artifacts folders")
+
+readme = Path("README.md").read_text(encoding="utf-8")
+bad = ["cat > README", "heredoc>", "Run this inside", "Then paste"]
+hits = [b for b in bad if b in readme]
+if hits:
+raise SystemExit("FAILED: README still contains shell instruction junk: " + ", ".join(hits))
+
+print("PASS: README clean")
+print("PASS: R2 binding is DASHBOARD → cms" if "DASHBOARD → cms" in readme else "WARN: R2 binding text not found")
+'
+
+git status -sb
+git diff -- README.md AGENTSAM_REPO_RULES.md .gitignore | sed -n "1,220p"
 
 
-Now copy the D1 audit report from your main repo into this isolated repo:
+Then commit it:
 
 ```bash
-cp /Users/samprimeaux/inneranimalmedia/artifacts/d1_audits/agentsam_cms_tables_20260514T160627Z.md docs/d1/agentsam_cms_tables_20260514T160627Z.md
-cp /Users/samprimeaux/inneranimalmedia/artifacts/d1_audits/agentsam_cms_tables_20260514T160627Z.json docs/d1/agentsam_cms_tables_20260514T160627Z.json
+cd /Users/samprimeaux/agentsam-cms-editor
 
-cat docs/d1/agentsam_cms_tables_20260514T160627Z.md
-
-Then commit that documentation:
-
-git add README.md AGENTSAM_REPO_RULES.md .gitignore docs/d1/agentsam_cms_tables_20260514T160627Z.md docs/d1/agentsam_cms_tables_20260514T160627Z.json
+git add README.md AGENTSAM_REPO_RULES.md .gitignore docs scripts
 git commit -m "docs: define Agent Sam CMS editor baseline"
 git push
-About wrangler.toml / wrangler.jsonc
-
-Yes, next you need one. I recommend wrangler.toml for this repo because it is simple and matches your current workflow.
-
-But because your Worker is already connected to main, I would add the config before adding src/worker.js, or add both only after we import the current live editor.
-
-Draft wrangler.toml should look like this:
-
-name = "agentsam-cms-editor"
-main = "src/worker.js"
-compatibility_date = "2026-05-14"
-account_id = "ede6590ac0d2fb7daf155b35653457b2"
-
-[vars]
-CLOUDFLARE_ACCOUNT_ID = "ede6590ac0d2fb7daf155b35653457b2"
-
-[[d1_databases]]
-binding = "DB"
-database_name = "inneranimalmedia-business"
-database_id = "cf87b717-d4e2-4cf8-bab0-a81268e32d49"
-
-[[r2_buckets]]
-binding = "DASHBOARD"
-bucket_name = "agent-sam"
-
-Do not put OPENAI_API_KEY or CLOUDFLARE_API_TOKEN in wrangler.toml.
-
-Those are already Worker secrets.
