@@ -7,7 +7,10 @@
   "workers_dev": true,
   "assets": {
     "directory": "./public",
-    "binding": "ASSETS"
+    "binding": "ASSETS",
+    "run_worker_first": [
+      "/analytics"
+    ]
   },
   "vars": {
     "CLOUDFLARE_ACCOUNT_ID": "ede6590ac0d2fb7daf155b35653457b2"
