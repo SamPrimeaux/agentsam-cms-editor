@@ -11,7 +11,11 @@ PATHS = [
     "/",
     "/design-studio",
     "/analytics",
+    "/dashboard/overview",
+    "/dashboard/finance",
+    "/dashboard/health",
     "/health",
+    "/api/health",
     "/api/audit",
 ]
 
@@ -22,9 +26,7 @@ HEADERS = {
 
 
 def fetch(path: str) -> tuple[int, str, bytes]:
-    url = BASE + path
-    req = urllib.request.Request(url, headers=HEADERS)
-
+    req = urllib.request.Request(BASE + path, headers=HEADERS)
     try:
         with urllib.request.urlopen(req, timeout=30) as res:
             return res.status, res.headers.get("content-type", ""), res.read()
@@ -34,15 +36,13 @@ def fetch(path: str) -> tuple[int, str, bytes]:
 
 def main() -> None:
     failures = []
-
     print(f"SMOKE {BASE}")
 
     for path in PATHS:
         status, content_type, body = fetch(path)
         ok = 200 <= status < 400
-        preview = body[:90].decode("utf-8", errors="replace").replace("\n", " ")
-        print(f"{'PASS' if ok else 'FAIL'} {status:<3} {path:<18} {content_type:<42} {len(body):>8} bytes  {preview}")
-
+        preview = body[:100].decode("utf-8", errors="replace").replace("\n", " ")
+        print(f"{'PASS' if ok else 'FAIL'} {status:<3} {path:<24} {content_type:<42} {len(body):>8} bytes  {preview}")
         if not ok:
             failures.append(path)
 
