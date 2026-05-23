@@ -1,165 +1,152 @@
 #!/usr/bin/env python3
 """
-Tier 1 — intent classification eval (30 prompts x up to 8 models).
-Writes proof artifact: evals/results/<date>_tier1_intent_classification.json
+Tier 1 — Intent classification eval (30 prompts × 8 models).
 
-Run locally (never commit secrets):
-  export OPENAI_API_KEY=...
-  export ANTHROPIC_API_KEY=...
+Taxonomy matches production routing arms. Partial credit via acceptable alternatives.
+Thompson proposals written to artifact only unless --apply-thompson (use apply script).
+
   python3 evals/tier1_intent_classification.py --dry-run
   python3 evals/tier1_intent_classification.py
+  python3 evals/tier1_intent_classification.py --live
+  python3 evals/tier1_intent_classification.py --dry-run-thompson   # default
+  python3 evals/tier1_intent_classification.py --write-d1             # agentsam_eval_runs rows
 """
 from __future__ import annotations
 
 import argparse
-import json
-import os
+import sys
 import time
-import urllib.error
-import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from evals.lib.candidates import EVAL_CANDIDATES
+from evals.lib.d1_writer import (
+    build_tier1_proposals,
+    write_artifact,
+    write_eval_run_rows,
+)
+from evals.lib.providers import classify_intent
+from evals.lib.scoring import (
+    aggregate_tier1_by_model,
+    alpha_delta,
+    beta_delta,
+    score,
+    thompson_success,
+)
+from evals.lib.taxonomy import PROMPT_CASES, TRAFFIC_WEIGHTS
+
 RESULTS = ROOT / "evals" / "results"
-
-MODELS = [
-    {"provider": "anthropic", "model_key": "anthropic_claude_haiku_4_5"},
-    {"provider": "openai", "model_key": "openai_gpt_4_1_mini"},
-    {"provider": "google", "model_key": "google_gemini_2_5_flash"},
-    {"provider": "workers_ai", "model_key": "workers_ai_llama"},
-]
-
-PROMPTS = [
-    "Classify intent: deploy the dashboard to production.",
-    "Classify intent: fix the workflow run that failed on step 3.",
-    "Classify intent: show me Thompson arms for cms_edit.",
-    "Classify intent: write a migration for agentsam_webhooks.",
-    "Classify intent: summarize last 24h ETO error rate by provider.",
-    "Classify intent: open design studio and edit the home page hero.",
-    "Classify intent: run tier1 eval and update routing arms.",
-    "Classify intent: mirror D1 plan rows to Supabase public.",
-    "Classify intent: inspect agentsam_workflow_runs for status failed.",
-    "Classify intent: add a new MCP tool binding for cloudflare observability.",
-    "Classify intent: rollback cms page publish to previous draft.",
-    "Classify intent: estimate Workers AI neuron cost for last 30 days.",
-    "Classify intent: wire dashboard overview to real D1 metrics.",
-    "Classify intent: spawn subagent for browser inspection workflow.",
-    "Classify intent: validate R2 dashboard chunk URLs return 200.",
-    "Classify intent: register todo and plan_task for sprint May 23.",
-    "Classify intent: explain why supabase_sync_status is pending.",
-    "Classify intent: list cms_* tables and relationships.",
-    "Classify intent: promote dev/cms-live-editor artifacts after approval.",
-    "Classify intent: compare win_rate across anthropic vs openai arms.",
-    "Classify intent: debug React is not defined on agentsam-cms-app.",
-    "Classify intent: execute wf_analytics_dashboard_three_page_e2e.",
-    "Classify intent: patch agentsam_workflow_handlers executor_kind.",
-    "Classify intent: fetch /api/analytics/finance cost intelligence.",
-    "Classify intent: create agentsam_cookbook from agent_recipe_prompts.",
-    "Classify intent: pause routing arm with high failure rate.",
-    "Classify intent: capture playwright proof for CMS editor deploy.",
-    "Classify intent: align D1 agentsam_plans session_notes after commit.",
-    "Classify intent: route chat request using Thompson sampling.",
-    "Classify intent: audit agent_recipe_prompts by category and role.",
-]
-
-INTENT_LABELS = [
-    "deploy",
-    "debug_workflow",
-    "routing_query",
-    "schema_migration",
-    "analytics",
-    "cms_edit",
-    "eval_run",
-    "mirror_sync",
-    "data_query",
-    "mcp_tool",
-    "cms_rollback",
-    "cost_estimate",
-    "dashboard_wire",
-    "subagent_spawn",
-    "frontend_validate",
-    "sprint_register",
-    "sync_debug",
-    "schema_discover",
-    "promotion_gate",
-    "routing_compare",
-    "frontend_debug",
-    "workflow_execute",
-    "handler_patch",
-    "api_fetch",
-    "cookbook_build",
-    "routing_pause",
-    "playwright_proof",
-    "plan_sync",
-    "chat_route",
-    "recipe_audit",
-]
-
-
-def stub_classify(prompt: str, model: dict) -> dict:
-    """Placeholder scorer until provider wiring in evals/lib/providers.py."""
-    idx = hash(prompt + model["model_key"]) % len(INTENT_LABELS)
-    return {
-        "predicted": INTENT_LABELS[idx],
-        "acceptable": [INTENT_LABELS[idx]],
-        "score": 1.0 if idx < len(INTENT_LABELS) else 0.0,
-        "latency_ms": 12,
-        "cost_usd": 0.0,
-    }
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--dry-run", action="store_true")
-    parser.add_argument("--limit-prompts", type=int, default=30)
-    parser.add_argument("--limit-models", type=int, default=8)
+    parser = argparse.ArgumentParser(description="Tier 1 intent classification eval")
+    parser.add_argument("--dry-run", action="store_true", help="Print summary only")
+    parser.add_argument("--live", action="store_true", help="Call provider APIs when keys set")
+    parser.add_argument(
+        "--apply-thompson",
+        action="store_true",
+        help="Mark artifact for Thompson apply (run evals/apply_thompson_proposals.py after review)",
+    )
+    parser.add_argument("--write-d1", action="store_true", help="Insert agentsam_eval_runs rows")
+    parser.add_argument("--limit-models", type=int, default=len(EVAL_CANDIDATES))
     args = parser.parse_args()
 
-    prompts = PROMPTS[: args.limit_prompts]
-    models = MODELS[: args.limit_models]
-    stamp = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    dry_run_thompson = not args.apply_thompson
+
+    models = EVAL_CANDIDATES[: args.limit_models]
+    stamp = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H%M%SZ")
     out_path = RESULTS / f"{stamp}_tier1_intent_classification.json"
+
+    rows: list[dict] = []
+    for i, case in enumerate(PROMPT_CASES):
+        for model in models:
+            t0 = time.time()
+            out = classify_intent(
+                case["prompt"],
+                model,
+                expected=case["expected"],
+                live=args.live,
+            )
+            s = score(out["predicted"], case["expected"])
+            latency = int((time.time() - t0) * 1000)
+            rows.append(
+                {
+                    "case_id": f"t1_{i:02d}",
+                    "prompt": case["prompt"],
+                    "expected": case["expected"],
+                    "acceptable": sorted(case["acceptable"]),
+                    "difficulty": case["difficulty"],
+                    "category": case["category"],
+                    "predicted": out["predicted"],
+                    "confidence": out["confidence"],
+                    "score": s,
+                    "thompson_success": thompson_success(s),
+                    "proposed_alpha_delta": alpha_delta(s),
+                    "proposed_beta_delta": beta_delta(s),
+                    "model": model,
+                    "latency_ms": latency,
+                    "input_tokens": out.get("input_tokens", 0),
+                    "output_tokens": out.get("output_tokens", 0),
+                    "cost_usd": out.get("cost_usd", 0),
+                    "cost_note": out.get("cost_note"),
+                    "raw": (out.get("raw") or "")[:500],
+                    "error": out.get("error"),
+                }
+            )
+
+    by_model = aggregate_tier1_by_model(rows)
+    proposals = build_tier1_proposals(rows, by_model)
 
     artifact = {
         "tier": "tier1",
         "name": "intent_classification",
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "dry_run": args.dry_run,
-        "prompts_count": len(prompts),
-        "models": models,
-        "results": [],
-        "summary": {"total": 0, "scored": 0, "avg_score": 0.0},
+        "live_providers": args.live,
+        "dry_run_thompson": dry_run_thompson,
+        "traffic_weights": TRAFFIC_WEIGHTS,
+        "prompts_count": len(PROMPT_CASES),
+        "models_count": len(models),
+        "primary_metric": "cost_per_correct_classification_at_10k_day",
+        "by_model": by_model,
+        "proposed_thompson_updates": proposals,
+        "results": rows,
+        "summary": {
+            "total_rows": len(rows),
+            "avg_score": round(sum(r["score"] for r in rows) / max(len(rows), 1), 4),
+            "models_tested": list(by_model.keys()),
+        },
     }
 
     if args.dry_run:
-        print(f"DRY RUN would write {out_path}")
-        print(json.dumps(artifact, indent=2)[:2000])
+        print(f"DRY RUN — would write {out_path}")
+        print(f"Models: {len(models)}  Prompts: {len(PROMPT_CASES)}  Rows: {len(rows)}")
+        for mk, stats in sorted(by_model.items(), key=lambda x: -x[1]["accuracy"]):
+            gap = stats.get("calibration_gap")
+            print(
+                f"  {mk}: acc={stats['accuracy']:.3f} cal_gap={gap} "
+                f"$/correct@10k={stats.get('cost_per_correct_at_10k_day')}"
+            )
         return
 
-    scored = 0
-    total_score = 0.0
-    for prompt in prompts:
-        for model in models:
-            t0 = time.time()
-            row = stub_classify(prompt, model)
-            row["prompt"] = prompt
-            row["model"] = model
-            row["elapsed_ms"] = int((time.time() - t0) * 1000)
-            artifact["results"].append(row)
-            if row["score"]:
-                scored += 1
-                total_score += row["score"]
+    write_artifact(out_path, artifact)
+    print(f"Wrote {out_path}")
 
-    artifact["summary"] = {
-        "total": len(artifact["results"]),
-        "scored": scored,
-        "avg_score": round(total_score / max(scored, 1), 4),
-    }
+    if args.write_d1:
+        n = write_eval_run_rows(
+            "tier1_intent_classification",
+            rows,
+            dry_run=dry_run_thompson,
+        )
+        print(f"D1 agentsam_eval_runs rows written: {n}")
 
-    RESULTS.mkdir(parents=True, exist_ok=True)
-    out_path.write_text(json.dumps(artifact, indent=2) + "\n")
-    print(f"Wrote {out_path} ({artifact['summary']['total']} rows)")
+    if dry_run_thompson:
+        print("Thompson: proposed deltas in artifact only. Review then:")
+        print("  python3 evals/apply_thompson_proposals.py --artifact", out_path)
 
 
 if __name__ == "__main__":

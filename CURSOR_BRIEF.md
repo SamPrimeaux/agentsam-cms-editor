@@ -42,14 +42,25 @@ Aliases: `/api/v1/*` (same handlers). Worker liveness: `/api/health`.
 
 Dashboard pages fetch `/api/analytics/*` (see `public/dashboard/dashboard.js`).
 
-## Eval suite
+## Eval suite (two-tier)
 
-```
-evals/
-  tier1_intent_classification.py
-  tier2_subagent_spawn.py
-  lib/
-  results/          # dated JSON proof artifacts (gitignored *.json)
+**Tier 1** — intent classification (`evals/tier1_intent_classification.py`)
+- 30 prompts: traffic-weighted (`chat` 74%, `code`, `tool_use`, `code_patch`, …)
+- 8 candidates including eval-only challengers (`arm_id: null`)
+- Partial credit via `evals/lib/scoring.py` (`ACCEPTABLE` alternatives)
+- Metrics: accuracy, calibration_gap, cost_per_correct_at_10k_day
+- Thompson: `proposed_thompson_updates` in artifact only — apply via `evals/apply_thompson_proposals.py`
+
+**Tier 2** — subagent spawn stress (`evals/tier2_subagent_spawn.py`)
+- 5 scenarios × 5 model combos (use `--smoke-only` first)
+- Scores: completion, quality, routing_accuracy, cost_per_quality_point
+- Feeds multitask / code / plan / tool_use arms (proposed, not auto-applied)
+
+```bash
+python3 evals/tier1_intent_classification.py          # stub providers
+python3 evals/tier1_intent_classification.py --live # needs API keys
+python3 evals/tier2_subagent_spawn.py --smoke-only
+python3 evals/apply_thompson_proposals.py --artifact evals/results/<file>.json --dry-run
 ```
 
 `POST /api/evals/trigger` — Phase 4 (KV + cron + PTY).
