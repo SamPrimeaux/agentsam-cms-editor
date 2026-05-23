@@ -1,0 +1,28 @@
+# Canonical config mirror — prefer wrangler.jsonc for $schema hints.
+# Deploy: npx wrangler deploy -c wrangler.toml
+
+name = "agentsam-cms-editor"
+main = "src/index.ts"
+compatibility_date = "2026-05-14"
+account_id = "ede6590ac0d2fb7daf155b35653457b2"
+workers_dev = true
+
+[assets]
+directory = "./public"
+binding = "ASSETS"
+run_worker_first = [ "/analytics", "/api/analytics", "/api/v1", "/api/health", "/api/evals" ]
+
+[vars]
+CLOUDFLARE_ACCOUNT_ID = "ede6590ac0d2fb7daf155b35653457b2"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "inneranimalmedia-business"
+database_id = "cf87b717-d4e2-4cf8-bab0-a81268e32d49"
+
+[[r2_buckets]]
+binding = "DASHBOARD"
+bucket_name = "cms"
+
+[observability]
+enabled = true

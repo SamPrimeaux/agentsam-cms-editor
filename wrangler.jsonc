@@ -1,7 +1,7 @@
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "agentsam-cms-editor",
-  "main": "src/worker.js",
+  "main": "src/index.ts",
   "compatibility_date": "2026-05-14",
   "account_id": "ede6590ac0d2fb7daf155b35653457b2",
   "workers_dev": true,
@@ -9,7 +9,11 @@
     "directory": "./public",
     "binding": "ASSETS",
     "run_worker_first": [
-      "/analytics"
+      "/analytics",
+      "/api/analytics",
+      "/api/v1",
+      "/api/health",
+      "/api/evals"
     ]
   },
   "vars": {

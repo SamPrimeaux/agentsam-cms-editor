@@ -4,7 +4,8 @@ const zlib = require("zlib");
 
 const root = process.cwd();
 const analyticsPath = path.join(root, "public", "analytics.html");
-const workerPath = path.join(root, "src", "worker.js");
+// Legacy bundler patch — do NOT run after TypeScript migration (src/index.ts is canonical).
+const workerPath = path.join(root, "src", "worker.legacy.js.bak");
 const smokePath = path.join(root, "scripts", "smoke", "smoke_endpoints.py");
 const dashDir = path.join(root, "public", "dashboard");
 

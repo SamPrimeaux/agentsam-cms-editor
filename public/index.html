@@ -3,31 +3,147 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Agent Sam CMS Editor</title>
+  <title>Inner Animal Media — Agent Sam Platform</title>
   <style>
-    body{margin:0;font-family:Inter,system-ui,sans-serif;background:#f6f0e6;color:#171411}
-    main{max-width:980px;margin:0 auto;padding:72px 24px}
-    section{background:rgba(255,255,255,.72);border:1px solid rgba(0,0,0,.12);border-radius:28px;padding:32px;box-shadow:0 24px 80px rgba(0,0,0,.08)}
-    h1{font-size:clamp(42px,8vw,88px);line-height:.92;letter-spacing:-.06em;margin:0 0 20px}
-    p{color:#6f675c;font-size:18px;line-height:1.55;max-width:740px}
-    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-top:28px}
-    a{display:block;text-decoration:none;color:inherit;border:1px solid rgba(0,0,0,.12);border-radius:20px;padding:18px;background:white}
-    small{text-transform:uppercase;letter-spacing:.16em;font-weight:800;color:#0e7b86}
+    :root {
+      --bg: #f6f0e6;
+      --ink: #171411;
+      --muted: #6f675c;
+      --card: rgba(255,255,255,.78);
+      --line: rgba(0,0,0,.12);
+      --accent: #0e7b86;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      min-height: 100vh;
+    }
+    main {
+      max-width: 1040px;
+      margin: 0 auto;
+      padding: 56px 24px 80px;
+    }
+    .hero {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 28px;
+      padding: 40px 36px 36px;
+      box-shadow: 0 24px 80px rgba(0,0,0,.08);
+    }
+    .eyebrow {
+      text-transform: uppercase;
+      letter-spacing: .18em;
+      font-weight: 800;
+      font-size: 11px;
+      color: var(--accent);
+      margin: 0 0 12px;
+    }
+    h1 {
+      font-size: clamp(36px, 6vw, 56px);
+      line-height: 1;
+      letter-spacing: -.04em;
+      margin: 0 0 10px;
+    }
+    .subtitle {
+      color: var(--muted);
+      font-size: 18px;
+      line-height: 1.55;
+      max-width: 640px;
+      margin: 0 0 32px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 14px;
+    }
+    a.card {
+      display: block;
+      text-decoration: none;
+      color: inherit;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: 20px 18px;
+      background: #fff;
+      transition: transform .15s ease, box-shadow .15s ease;
+    }
+    a.card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 32px rgba(0,0,0,.08);
+    }
+    a.card strong {
+      display: block;
+      font-size: 17px;
+      margin-bottom: 8px;
+    }
+    a.card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.45;
+    }
+    .meta {
+      margin-top: 10px;
+      font-size: 12px;
+      color: var(--accent);
+      font-weight: 600;
+    }
+    footer {
+      margin-top: 24px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+    footer a { color: var(--accent); }
   </style>
 </head>
 <body>
   <main>
-    <section>
-      <small>Agent Sam CMS Editor</small>
-      <h1>Mini Shopify CMS + workflow sandbox.</h1>
-      <p>MPA scaffold for the isolated CMS editor, analytics dashboard, D1/R2 bindings, and future OpenAI-powered Agent Sam workflows.</p>
+    <section class="hero">
+      <p class="eyebrow">Inner Animal Media</p>
+      <h1>Agent Sam Platform</h1>
+      <p class="subtitle">Cloudflare-native AI orchestration + CMS system</p>
+
       <div class="grid">
-        <a href="/design-studio"><strong>Design Studio</strong><p>Open the CMS editor.</p></a>
-        <a href="/analytics"><strong>Analytics</strong><p>Open the analytics dashboard.</p></a>
-        <a href="/health"><strong>Health</strong><p>Check Worker bindings.</p></a>
-        <a href="/api/audit"><strong>Audit</strong><p>View scaffold source metadata.</p></a>
+        <a class="card" href="/design-studio">
+          <strong>Design Studio</strong>
+          <p>CMS editor for IAM and client sites. Atelier shell with live D1 pages.</p>
+        </a>
+        <a class="card" href="/dashboard/health">
+          <strong>Platform Health</strong>
+          <p>Provider ETO error rates, latency, Thompson arm coverage, deploy timeline.</p>
+        </a>
+        <a class="card" href="/dashboard/overview">
+          <strong>Thompson Eval</strong>
+          <p>Routing arms, workflow runs, ETO failure rate, top model win rates.</p>
+        </a>
+        <a class="card" href="/dashboard/overview#deploys">
+          <strong>Deploy History</strong>
+          <p id="deploy-blurb">Loading deploy stats from D1…</p>
+          <span class="meta" id="deploy-meta"></span>
+        </a>
       </div>
+
+      <footer>
+        API:
+        <a href="/api/analytics/overview">overview</a> ·
+        <a href="/api/analytics/health">health</a> ·
+        <a href="/api/analytics/finance">finance</a> ·
+        <a href="/api/v1/evals">evals</a>
+      </footer>
     </section>
   </main>
+  <script>
+    fetch('/api/analytics/health').then(function (r) { return r.json(); }).then(function (d) {
+      var total = (d.deployTotal && d.deployTotal.total_deploys) || '—';
+      var last = (d.deployTotal && d.deployTotal.last_deploy_at) || 'unknown';
+      document.getElementById('deploy-blurb').textContent =
+        total + ' deploys in D1. Workflow + Thompson metrics on Overview.';
+      document.getElementById('deploy-meta').textContent = 'Last deploy: ' + last;
+    }).catch(function () {
+      document.getElementById('deploy-blurb').textContent = '108+ deploys tracked (see /api/analytics/health).';
+    });
+  </script>
 </body>
 </html>

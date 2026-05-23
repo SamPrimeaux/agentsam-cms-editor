@@ -16,6 +16,7 @@ PATHS = [
     "/dashboard/health",
     "/health",
     "/api/health",
+    "/api/v1/worker",
     "/api/audit",
 ]
 
