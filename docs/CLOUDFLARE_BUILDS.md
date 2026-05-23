@@ -1,7 +1,9 @@
 # Cloudflare Workers Builds (Git → `main`)
 
-Worker: **`agentsam-cms-editor`**  
-Config: **`wrangler.toml`** / **`wrangler.jsonc`** (`main = "src/entry.py"`, `python_workers`)
+Worker: **`agentsam-cms-editor`** (TypeScript stable)  
+Config: **`wrangler.toml`** / **`wrangler.jsonc`** (`main = "src/index.ts"`)
+
+Python challenger **`agentsam-cms-python`** is **not** deployed from CF Git on `main` — use `npm run deploy:python` locally. See [`DUAL_RUNTIME_THOMPSON.md`](./DUAL_RUNTIME_THOMPSON.md).
 
 ## Dashboard settings (Workers & Pages → agentsam-cms-editor → Settings → Builds)
 
