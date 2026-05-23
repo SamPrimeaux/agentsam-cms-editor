@@ -39,6 +39,9 @@ CREATE TABLE IF NOT EXISTS agentsam_cookbook (
 );
 """
 
+# D1 REST API rejects UPSERT (ON CONFLICT DO UPDATE) — use full refresh instead.
+CLEAR_SQL = "DELETE FROM agentsam_cookbook;"
+
 INSERT_SQL = """
 INSERT INTO agentsam_cookbook (
   id, recipe_id, name, slug, category, role_name, description,
@@ -58,19 +61,7 @@ SELECT
   COALESCE(usage_count, 0),
   rating,
   datetime('now')
-FROM agent_recipe_prompts
-ON CONFLICT(recipe_id) DO UPDATE SET
-  name = excluded.name,
-  slug = excluded.slug,
-  category = excluded.category,
-  role_name = excluded.role_name,
-  description = excluded.description,
-  prompt_text = excluded.prompt_text,
-  parameters_json = excluded.parameters_json,
-  tags_json = excluded.tags_json,
-  usage_count = excluded.usage_count,
-  rating = excluded.rating,
-  synced_at = excluded.synced_at;
+FROM agent_recipe_prompts;
 """
 
 
@@ -111,7 +102,8 @@ def main() -> None:
 
     steps = [
         ("create_table", CREATE_SQL),
-        ("upsert_recipes", INSERT_SQL),
+        ("clear_cookbook", CLEAR_SQL),
+        ("insert_recipes", INSERT_SQL),
         (
             "count",
             "SELECT COUNT(*) AS n FROM agentsam_cookbook;",

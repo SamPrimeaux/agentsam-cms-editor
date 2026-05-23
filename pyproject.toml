@@ -1,0 +1,8 @@
+[project]
+name = "agentsam-cms-editor-worker"
+version = "0.2.0"
+requires-python = ">=3.12"
+dependencies = []
+
+[dependency-groups]
+dev = ["workers-py", "workers-runtime-sdk"]
