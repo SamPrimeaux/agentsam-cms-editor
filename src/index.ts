@@ -110,17 +110,16 @@ export default {
         501);
     }
 
-    // ── Static dashboard pages ──────────────────────────────────────────
-    if (pathname === "/health" || pathname === "/dashboard/health") {
-      return asset("/dashboard/health.html", request, env);
-    }
-
-    if (pathname === "/dashboard/overview") {
-      return asset("/dashboard/overview.html", request, env);
-    }
-
-    if (pathname === "/dashboard/finance") {
-      return asset("/dashboard/finance.html", request, env);
+    // ── React analytics SPA (Vite build → public/analytics/) ─────────────
+    const DASHBOARD_VIEWS = new Set(["overview", "finance", "health"]);
+    const dashView = pathname.startsWith("/dashboard/")
+      ? pathname.split("/").pop()
+      : null;
+    if (
+      pathname === "/health" ||
+      (dashView && DASHBOARD_VIEWS.has(dashView))
+    ) {
+      return asset("/analytics/index.html", request, env);
     }
 
     if (pathname === "/analytics") {

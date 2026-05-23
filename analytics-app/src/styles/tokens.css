@@ -1,0 +1,18 @@
+/**
+ * IAM dashboard design tokens — keep in sync with inneranimalmedia dashboard CSS vars.
+ * Portable components MUST only use these variables (no hardcoded brand colors).
+ */
+:root {
+  --dashboard-bg: #0f1419;
+  --dashboard-panel: #1a1820;
+  --dashboard-panel-elevated: #24212b;
+  --dashboard-border: rgba(148, 163, 184, 0.14);
+  --dashboard-text: #f4f1ec;
+  --dashboard-muted: #9b9488;
+  --solar-cyan: #0e7b86;
+  --solar-cyan-dim: rgba(14, 123, 134, 0.35);
+  --status-good: #3d9a6a;
+  --status-warn: #c9a227;
+  --status-bad: #c45c5c;
+  --font-sans: Inter, system-ui, -apple-system, sans-serif;
+}

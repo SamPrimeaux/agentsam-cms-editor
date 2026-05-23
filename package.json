@@ -5,12 +5,14 @@
   "type": "module",
   "scripts": {
     "dev": "wrangler dev -c wrangler.jsonc",
-    "deploy:dry": "wrangler deploy -c wrangler.toml --dry-run",
-    "deploy": "wrangler deploy -c wrangler.toml",
+    "dev:analytics": "cd analytics-app && npm run dev",
+    "build:analytics": "bash scripts/build/build_analytics_app.sh",
+    "deploy:dry": "npm run build:analytics && wrangler deploy -c wrangler.toml --dry-run",
+    "deploy": "npm run build:analytics && wrangler deploy -c wrangler.toml",
     "smoke": "python3 scripts/smoke/smoke_endpoints.py",
     "smoke:api": "python3 scripts/smoke/smoke_api_v1.py",
     "typecheck": "tsc --noEmit",
-    "build": "npm run typecheck && wrangler deploy -c wrangler.jsonc --dry-run",
+    "build": "npm run build:analytics && npm run typecheck",
     "preview-build": "npm run build"
   },
   "devDependencies": {

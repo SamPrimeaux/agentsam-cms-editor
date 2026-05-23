@@ -40,7 +40,10 @@ Execute workflows in D1 — do not re-scaffold from scratch:
 
 Aliases: `/api/v1/*` (same handlers). Worker liveness: `/api/health`.
 
-Dashboard pages fetch `/api/analytics/*` (see `public/dashboard/dashboard.js`).
+Dashboard UI is a **Vite React app** (`analytics-app/`) built to `public/analytics/`.
+Routes `/dashboard/overview|finance|health` serve the SPA; data from `/api/analytics/*`.
+Portable components: `analytics-app/src/portable/index.ts` → copy to IAM `dashboard/components/analytics/portable/`.
+Workflow contract: `docs/WORKFLOW_ANALYTICS_REACT_BUILDOUT.md`.
 
 ## Eval suite (two-tier)
 

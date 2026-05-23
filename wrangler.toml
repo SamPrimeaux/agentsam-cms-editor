@@ -10,7 +10,7 @@ workers_dev = true
 [assets]
 directory = "./public"
 binding = "ASSETS"
-run_worker_first = [ "/analytics", "/api/analytics", "/api/v1", "/api/health", "/api/evals" ]
+run_worker_first = [ "/dashboard", "/health", "/analytics", "/api/analytics", "/api/v1", "/api/health", "/api/evals" ]
 
 [vars]
 CLOUDFLARE_ACCOUNT_ID = "ede6590ac0d2fb7daf155b35653457b2"

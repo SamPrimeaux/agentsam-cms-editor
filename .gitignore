@@ -1,4 +1,6 @@
 node_modules/
+analytics-app/node_modules/
+analytics-app/tsconfig.tsbuildinfo
 __pycache__/
 *.pyc
 .env

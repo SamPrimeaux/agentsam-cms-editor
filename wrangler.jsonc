@@ -9,6 +9,8 @@
     "directory": "./public",
     "binding": "ASSETS",
     "run_worker_first": [
+      "/dashboard",
+      "/health",
       "/analytics",
       "/api/analytics",
       "/api/v1",
