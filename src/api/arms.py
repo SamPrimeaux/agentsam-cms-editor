@@ -9,48 +9,47 @@ async def get_arms(db, task_type=None, mode=None, limit=25):
     mode = (mode or "").strip() or None
     limit = max(1, min(int(limit or 25), 100))
 
+    where = ["is_active = 1"]
+    bindings: list = []
+    if task_type:
+        where.append("task_type = ?")
+        bindings.append(task_type)
+    if mode:
+        where.append("mode = ?")
+        bindings.append(mode)
+    clause = " AND ".join(where)
+
     summary = await d1.first(
         db,
-        """
+        f"""
     SELECT
       COUNT(*) AS total_arms,
       COUNT(CASE WHEN total_executions > 0 THEN 1 END) AS active_arms,
       COUNT(CASE WHEN is_paused = 1 THEN 1 END) AS paused_arms
     FROM agentsam_routing_arms
-    WHERE is_active = 1
-      AND (? IS NULL OR task_type = ?)
-      AND (? IS NULL OR mode = ?)
+    WHERE {clause}
     """,
-        task_type,
-        task_type,
-        mode,
-        mode,
+        *bindings,
     )
 
     arms = await d1.all_rows(
         db,
-        """
+        f"""
     SELECT
       id, task_type, mode, model_key, provider, agent_slug,
       total_executions, is_paused, is_eligible,
-      ROUND(success_alpha / (success_alpha + success_beta), 4) AS win_rate,
+      ROUND(success_alpha / NULLIF(success_alpha + success_beta, 0), 4) AS win_rate,
       success_alpha, success_beta, avg_quality_score, quality_n,
       decayed_score, updated_at
     FROM agentsam_routing_arms
-    WHERE is_active = 1
-      AND (? IS NULL OR task_type = ?)
-      AND (? IS NULL OR mode = ?)
+    WHERE {clause}
     ORDER BY
       CASE WHEN total_executions > 0 THEN 0 ELSE 1 END,
-      (success_alpha / (success_alpha + success_beta)) DESC,
+      (success_alpha / NULLIF(success_alpha + success_beta, 0)) DESC,
       total_executions DESC
-    LIMIT ?
+    LIMIT {limit}
     """,
-        task_type,
-        task_type,
-        mode,
-        mode,
-        limit,
+        *bindings,
     )
 
     leader = None

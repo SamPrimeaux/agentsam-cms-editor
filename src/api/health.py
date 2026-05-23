@@ -1,12 +1,10 @@
-import asyncio
 from datetime import datetime, timezone
 
 from lib import d1
 
 
 async def get_health(db):
-    core, providers, thompson, deploy_history, deploy_total = await asyncio.gather(
-        d1.first(
+    core = await d1.first(
             db,
             """
       SELECT
@@ -19,8 +17,8 @@ async def get_health(db):
       FROM agentsam_performance_eto_events
       WHERE created_at > datetime('now', '-24 hours')
       """,
-        ),
-        d1.all_rows(
+    )
+    providers = await d1.all_rows(
             db,
             """
       SELECT provider,
@@ -35,8 +33,8 @@ async def get_health(db):
       GROUP BY provider
       ORDER BY total DESC
       """,
-        ),
-        d1.all_rows(
+    )
+    thompson = await d1.all_rows(
             db,
             """
       SELECT task_type,
@@ -50,8 +48,8 @@ async def get_health(db):
       ORDER BY total_execs DESC
       LIMIT 15
       """,
-        ),
-        d1.all_rows(
+    )
+    deploy_history = await d1.all_rows(
             db,
             """
       SELECT date(created_at, 'unixepoch') AS day,
@@ -62,15 +60,14 @@ async def get_health(db):
       GROUP BY date(created_at, 'unixepoch'), status
       ORDER BY day DESC
       """,
-        ),
-        d1.first(
+    )
+    deploy_total = await d1.first(
             db,
             """
       SELECT COUNT(*) AS total_deploys,
         MAX(datetime(created_at, 'unixepoch')) AS last_deploy_at
       FROM deployments
       """,
-        ),
     )
     return {
         "ok": True,

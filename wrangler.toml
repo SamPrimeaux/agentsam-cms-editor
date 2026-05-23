@@ -1,14 +1,11 @@
 # Canonical config mirror — prefer wrangler.jsonc for $schema hints.
 # Deploy: npm run deploy  (builds analytics-app, then wrangler deploy)
-# CF Workers Git integration on main uses [build] before deploy.
-
-[build]
-command = "npm ci && npm run build:analytics"
+# CF Workers Git on main: set build command to `npm ci && npm run build` (see README).
 
 name = "agentsam-cms-editor"
 main = "src/entry.py"
 compatibility_date = "2026-05-14"
-compatibility_flags = ["python_workers"]
+compatibility_flags = ["python_workers", "disable_python_external_sdk"]
 account_id = "ede6590ac0d2fb7daf155b35653457b2"
 workers_dev = true
 

@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 from urllib.parse import urlparse, parse_qs
 
-from workers import Response, WorkerEntrypoint
+from workers import Request, Response, WorkerEntrypoint
 
 from api.arms import get_arms
 from api.evals import get_eval_status
@@ -132,7 +132,8 @@ class Default(WorkerEntrypoint):
     async def _asset(self, pathname, request):
         base = urlparse(request.url)
         asset_url = f"{base.scheme}://{base.netloc}{pathname}"
-        return await self.env.ASSETS.fetch(Request(asset_url, request))
+        asset_request = Request(asset_url, method=request.method, headers=request.headers)
+        return await self.env.ASSETS.fetch(asset_request)
 
 
 def worker_health(env):

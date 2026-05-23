@@ -3,6 +3,10 @@ analytics-app/node_modules/
 analytics-app/tsconfig.tsbuildinfo
 __pycache__/
 *.pyc
+.venv/
+.venv-workers/
+python_modules/
+uv.lock
 .env
 .env.*
 !.env.example

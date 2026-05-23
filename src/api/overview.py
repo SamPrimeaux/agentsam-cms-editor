@@ -1,4 +1,3 @@
-import asyncio
 from datetime import datetime, timezone
 
 from lib import d1
@@ -53,12 +52,10 @@ LIMIT 10
 
 
 async def get_overview(db):
-    platform, activity, arms, top_models = await asyncio.gather(
-        d1.first(db, SQL_PLATFORM),
-        d1.all_rows(db, SQL_ACTIVITY),
-        d1.first(db, SQL_ARMS),
-        d1.all_rows(db, SQL_TOP_MODELS),
-    )
+    platform = await d1.first(db, SQL_PLATFORM)
+    activity = await d1.all_rows(db, SQL_ACTIVITY)
+    arms = await d1.first(db, SQL_ARMS)
+    top_models = await d1.all_rows(db, SQL_TOP_MODELS)
     return {
         "ok": True,
         "generated_at": datetime.now(timezone.utc).isoformat(),

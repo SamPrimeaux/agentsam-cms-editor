@@ -413,10 +413,12 @@ npm run dev:analytics    # Vite only on analytics-app
 ```bash
 npm run build:analytics    # always before deploy
 npm run deploy:dry         # bundle check, no upload
-npm run deploy             # build + wrangler deploy
+npm run deploy             # build + wrangler deploy (Python + disable_python_external_sdk)
 ```
 
-Cloudflare Builds may auto-deploy **`main`**; dashboard asset changes require a local `npm run deploy` (or build step in CI) so `public/analytics/` is current.
+**Cloudflare Workers Builds (Git → `main`):** set build command to `npm ci && npm run build` and deploy command to `npm run deploy`. See [`docs/CLOUDFLARE_BUILDS.md`](./docs/CLOUDFLARE_BUILDS.md).
+
+`wrangler.toml` requires `compatibility_flags = ["python_workers", "disable_python_external_sdk"]` so deploy works without vendoring `workers-py` into `python_modules/`.
 
 ### Smoke
 

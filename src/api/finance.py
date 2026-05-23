@@ -1,4 +1,3 @@
-import asyncio
 from datetime import datetime, timezone
 
 from lib import d1
@@ -6,10 +5,9 @@ from lib.d1 import row_val
 
 
 async def get_cost_intelligence(db):
-    spend, efficiency, daily, workers_ai = await asyncio.gather(
-        d1.all_rows(
-            db,
-            """
+    spend = await d1.all_rows(
+        db,
+        """
       SELECT provider, model_key,
         COUNT(*) AS calls,
         ROUND(SUM(cost_usd), 4) AS total_cost,
@@ -21,10 +19,10 @@ async def get_cost_intelligence(db):
       GROUP BY provider, model_key
       ORDER BY total_cost DESC
       """,
-        ),
-        d1.all_rows(
-            db,
-            """
+    )
+    efficiency = await d1.all_rows(
+        db,
+        """
       SELECT provider,
         ROUND(SUM(cost_usd), 4) AS total_cost,
         COUNT(CASE WHEN success = 1 THEN 1 END) AS successes,
@@ -37,10 +35,10 @@ async def get_cost_intelligence(db):
       GROUP BY provider
       ORDER BY total_cost DESC
       """,
-        ),
-        d1.all_rows(
-            db,
-            """
+    )
+    daily = await d1.all_rows(
+        db,
+        """
       SELECT DATE(created_at) AS day,
         ROUND(SUM(cost_usd), 4) AS daily_cost,
         COUNT(*) AS events,
@@ -50,10 +48,10 @@ async def get_cost_intelligence(db):
       GROUP BY DATE(created_at)
       ORDER BY day ASC
       """,
-        ),
-        d1.first(
-            db,
-            """
+    )
+    workers_ai = await d1.first(
+        db,
+        """
       SELECT
         COUNT(*) AS wai_calls,
         SUM(input_tokens + output_tokens) AS total_tokens,
@@ -63,7 +61,6 @@ async def get_cost_intelligence(db):
       WHERE provider = 'workers_ai'
         AND created_at > datetime('now', '-30 days')
       """,
-        ),
     )
     total = sum(float(row_val(r, "total_cost") or 0) for r in spend)
     return {
