@@ -130,10 +130,9 @@ class Default(WorkerEntrypoint):
         return await self.env.ASSETS.fetch(request)
 
     async def _asset(self, pathname, request):
-        base = urlparse(request.url)
+        base = urlparse(str(request.url))
         asset_url = f"{base.scheme}://{base.netloc}{pathname}"
-        asset_request = Request(asset_url, method=request.method, headers=request.headers)
-        return await self.env.ASSETS.fetch(asset_request)
+        return await self.env.ASSETS.fetch(asset_url)
 
 
 def worker_health(env):
