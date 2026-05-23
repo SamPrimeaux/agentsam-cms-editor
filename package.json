@@ -11,8 +11,9 @@
     "deploy": "npm run build:analytics && wrangler deploy -c wrangler.toml",
     "smoke": "python3 scripts/smoke/smoke_endpoints.py",
     "smoke:api": "python3 scripts/smoke/smoke_api_v1.py",
-    "typecheck": "tsc --noEmit",
-    "build": "npm run build:analytics && npm run typecheck",
+    "typecheck": "cd analytics-app && npm run typecheck",
+    "build:worker": "npm run build:analytics",
+    "build": "npm run build:analytics",
     "preview-build": "npm run build"
   },
   "devDependencies": {

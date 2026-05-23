@@ -1,6 +1,14 @@
 # agentsam-cms-editor — Cursor Brief
 # Last updated: 2026-05-23
 
+## Worker runtime
+
+**Python** (`src/entry.py`, `compatibility_flags = ["python_workers"]`). TypeScript worker removed on branch `python/cms-worker`.
+
+- Analytics React app unchanged: `analytics-app/` → `public/analytics/`
+- Full eval suite: CLI (`evals/tier1_*.py`); Worker `POST /api/evals/run` runs inline stub only
+- Cross-repo portable contract: `docs/ANALYTICS_PORTABLE_CONTRACT.md`
+
 ## What this repo is
 
 Standalone Cloudflare Worker sandbox at:
