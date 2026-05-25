@@ -1,7 +1,12 @@
-# TypeScript stable Worker (production arm for CF Git → main).
-#   npm run deploy
+# AgentSam CMS Editor — TypeScript stable Worker
 # Live: https://agentsam-cms-editor.meauxbility.workers.dev
-# Python challenger: wrangler.python.toml → agentsam-cms-python
+# Python arm: wrangler.python.toml → agentsam-cms-python
+# Runtime contract: locked 2026-05-25
+#   ASSETS_BUCKET = cms R2
+#   DB            = inneranimalmedia-business D1
+#   HYPERDRIVE    = inneranimalmedia-supabase-hyperdrive → Supabase pgvector
+#   MYBROWSER     = Cloudflare Browser Run → Playwright/CDT
+#   SESSION_CACHE = production-KV_SESSIONS → workspace/agent session state
 
 name = "agentsam-cms-editor"
 main = "src/index.ts"
@@ -32,8 +37,19 @@ database_name = "inneranimalmedia-business"
 database_id = "cf87b717-d4e2-4cf8-bab0-a81268e32d49"
 
 [[r2_buckets]]
-binding = "DASHBOARD"
+binding = "ASSETS_BUCKET"
 bucket_name = "cms"
+
+[[kv_namespaces]]
+binding = "SESSION_CACHE"
+id = "dc87920b0a9247979a213c09df9a0234"
+
+[[hyperdrive]]
+binding = "HYPERDRIVE"
+id = "08183bb9d2914e87ac8395d7e4ecff60"
+
+[browser]
+binding = "MYBROWSER"
 
 [observability]
 enabled = true
