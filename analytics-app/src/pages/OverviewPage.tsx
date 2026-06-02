@@ -3,14 +3,28 @@ import { ActivityLineChart } from "@/components/charts/ActivityLineChart";
 import { KpiCard } from "@/components/kpi/KpiCard";
 import { KpiGrid } from "@/components/kpi/KpiGrid";
 import { SimpleTable } from "@/components/tables/SimpleTable";
+import { PresenceInline } from "@/features/presence";
 import { useAnalyticsQuery } from "@/hooks/useAnalyticsQuery";
 import { fmtNumber, fmtPct, fmtUsd } from "@/lib/format";
 
 export function OverviewPage() {
   const { data, error, loading } = useAnalyticsQuery(() => analyticsApi.overview(), []);
 
-  if (loading) return <p className="analytics-status">Loading overview…</p>;
-  if (error) return <p className="analytics-status err">Failed: {error}</p>;
+  if (loading) {
+    return <PresenceInline mode="workflow" state="loading" title="Loading overview" label="Workflow" />;
+  }
+  if (error) {
+    return (
+      <PresenceInline
+        mode="workflow"
+        state="failed"
+        title="Overview failed"
+        description={String(error)}
+        label="Workflow"
+        tone="danger"
+      />
+    );
+  }
   if (!data) return null;
 
   const p = data.platform;

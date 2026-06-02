@@ -1,0 +1,247 @@
+:root {
+  --presence-neutral-bg: rgba(15, 23, 42, 0.08);
+  --presence-neutral-fg: #334155;
+
+  --presence-info-bg: rgba(14, 165, 233, 0.12);
+  --presence-info-fg: #0369a1;
+
+  --presence-success-bg: rgba(34, 197, 94, 0.12);
+  --presence-success-fg: #15803d;
+
+  --presence-warning-bg: rgba(245, 158, 11, 0.14);
+  --presence-warning-fg: #92400e;
+
+  --presence-danger-bg: rgba(239, 68, 68, 0.12);
+  --presence-danger-fg: #b91c1c;
+
+  --presence-brand-bg: rgba(99, 102, 241, 0.14);
+  --presence-brand-fg: #4f46e5;
+
+  --cms-mode-edit: #14b8a6;
+  --cms-mode-design: #8b5cf6;
+  --cms-mode-preview: #22c55e;
+  --cms-mode-content: #f59e0b;
+  --cms-mode-media: #0ea5e9;
+  --cms-mode-workflow: #6366f1;
+  --cms-mode-publish: #ef4444;
+  --cms-mode-settings: #94a3b8;
+}
+
+.presence {
+  --presence-mode-color: var(--cms-mode-workflow);
+  --presence-icon-color: var(--presence-brand-fg);
+  --presence-chip-bg: var(--presence-brand-bg);
+  --presence-chip-fg: var(--presence-brand-fg);
+}
+
+.presence[data-tone="neutral"] {
+  --presence-chip-bg: var(--presence-neutral-bg);
+  --presence-chip-fg: var(--presence-neutral-fg);
+}
+.presence[data-tone="info"] {
+  --presence-chip-bg: var(--presence-info-bg);
+  --presence-chip-fg: var(--presence-info-fg);
+}
+.presence[data-tone="success"] {
+  --presence-chip-bg: var(--presence-success-bg);
+  --presence-chip-fg: var(--presence-success-fg);
+}
+.presence[data-tone="warning"] {
+  --presence-chip-bg: var(--presence-warning-bg);
+  --presence-chip-fg: var(--presence-warning-fg);
+}
+.presence[data-tone="danger"] {
+  --presence-chip-bg: var(--presence-danger-bg);
+  --presence-chip-fg: var(--presence-danger-fg);
+}
+.presence[data-tone="brand"] {
+  --presence-chip-bg: var(--presence-brand-bg);
+  --presence-chip-fg: var(--presence-brand-fg);
+}
+
+.presenceIcon {
+  display: inline-grid;
+  place-items: center;
+  color: var(--presence-icon-color);
+  filter: drop-shadow(0 0 12px color-mix(in srgb, var(--presence-icon-color) 35%, transparent));
+}
+
+.presenceIcon svg {
+  display: block;
+}
+
+.presenceStroke {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.presenceFill {
+  fill: currentColor;
+}
+
+.presenceIcon--xs {
+  width: 14px;
+  height: 14px;
+}
+.presenceIcon--sm {
+  width: 18px;
+  height: 18px;
+}
+.presenceIcon--md {
+  width: 22px;
+  height: 22px;
+}
+.presenceIcon--lg {
+  width: 30px;
+  height: 30px;
+}
+
+.presenceInline {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 10px;
+  align-items: center;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid var(--dashboard-border);
+  background: color-mix(in srgb, var(--dashboard-panel) 86%, transparent);
+}
+
+.presenceInline__content {
+  min-width: 0;
+}
+
+.presenceInline__title {
+  font-size: 13px;
+  font-weight: 750;
+  letter-spacing: -0.02em;
+  color: var(--dashboard-text);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.presenceInline__meta {
+  margin-top: 3px;
+  font-size: 11px;
+  color: var(--dashboard-muted);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.presenceInline__chip {
+  justify-self: end;
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-size: 10px;
+  font-weight: 850;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  background: var(--presence-chip-bg);
+  color: var(--presence-chip-fg);
+  border: 1px solid color-mix(in srgb, var(--presence-chip-fg) 26%, var(--dashboard-border));
+  white-space: nowrap;
+}
+
+.presenceCard {
+  border: 1px solid var(--dashboard-border);
+  border-radius: 16px;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--dashboard-panel) 98%, transparent),
+    color-mix(in srgb, var(--dashboard-panel-elevated, var(--dashboard-panel)) 92%, transparent)
+  );
+  overflow: hidden;
+}
+
+.presenceCard__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 14px 0;
+}
+
+.presenceCard__title {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 850;
+  letter-spacing: -0.02em;
+}
+
+.presenceCard__desc {
+  margin: 6px 0 0;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--dashboard-muted);
+}
+
+.presenceCard__stage {
+  display: grid;
+  place-items: center;
+  padding: 12px 14px 14px;
+}
+
+.presenceCard__footer {
+  border-top: 1px solid var(--dashboard-border);
+  padding: 10px 12px 12px;
+  font-size: 11px;
+  color: var(--dashboard-muted);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+    "Courier New", monospace;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.presenceMotion--spin {
+  transform-origin: center;
+  animation: presenceSpin 1.65s linear infinite;
+}
+.presenceMotion--dash {
+  stroke-dasharray: 12 24;
+  animation: presenceDash 1.15s linear infinite;
+}
+.presenceMotion--pulse {
+  transform-origin: center;
+  animation: presencePulse 1.25s cubic-bezier(0.2, 0.8, 0.2, 1) infinite;
+}
+.presenceMotion--glow {
+  filter: drop-shadow(0 0 14px color-mix(in srgb, currentColor 45%, transparent))
+    drop-shadow(0 0 30px color-mix(in srgb, currentColor 18%, transparent));
+}
+
+@keyframes presenceSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes presenceDash {
+  to {
+    stroke-dashoffset: -36;
+  }
+}
+@keyframes presencePulse {
+  0%,
+  100% {
+    opacity: 0.45;
+    transform: scale(0.88);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.08);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .presenceMotion--spin,
+  .presenceMotion--dash,
+  .presenceMotion--pulse {
+    animation: none !important;
+  }
+}
+

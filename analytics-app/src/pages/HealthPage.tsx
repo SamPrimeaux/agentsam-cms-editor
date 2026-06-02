@@ -2,6 +2,7 @@ import { analyticsApi } from "@/api/client";
 import { KpiCard } from "@/components/kpi/KpiCard";
 import { KpiGrid } from "@/components/kpi/KpiGrid";
 import { SimpleTable } from "@/components/tables/SimpleTable";
+import { PresenceInline } from "@/features/presence";
 import { useAnalyticsQuery } from "@/hooks/useAnalyticsQuery";
 import { fmtNumber, fmtPct } from "@/lib/format";
 
@@ -14,8 +15,21 @@ function errorPill(pct: number | null | undefined) {
 export function HealthPage() {
   const { data, error, loading } = useAnalyticsQuery(() => analyticsApi.health(), []);
 
-  if (loading) return <p className="analytics-status">Loading health…</p>;
-  if (error) return <p className="analytics-status err">Failed: {error}</p>;
+  if (loading) {
+    return <PresenceInline mode="workflow" state="loading" title="Loading health" label="Workflow" />;
+  }
+  if (error) {
+    return (
+      <PresenceInline
+        mode="workflow"
+        state="failed"
+        title="Health check failed"
+        description={String(error)}
+        label="Workflow"
+        tone="danger"
+      />
+    );
+  }
   if (!data) return null;
 
   const c = data.core;
