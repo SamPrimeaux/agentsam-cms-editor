@@ -1,12 +1,6 @@
-# AgentSam CMS Editor — TypeScript stable Worker
+# AgentSam CMS Editor
 # Live: https://agentsam-cms-editor.meauxbility.workers.dev
-# Python arm: wrangler.python.toml → agentsam-cms-python
-# Runtime contract: locked 2026-05-25
-#   ASSETS_BUCKET = cms R2
-#   DB            = inneranimalmedia-business D1
-#   HYPERDRIVE    = inneranimalmedia-supabase-hyperdrive → Supabase pgvector
-#   MYBROWSER     = Cloudflare Browser Run → Playwright/CDT
-#   SESSION_CACHE = production-KV_SESSIONS → workspace/agent session state
+# Design Studio: https://agentsam-cms-editor.meauxbility.workers.dev/design-studio
 
 name = "agentsam-cms-editor"
 main = "src/index.ts"
@@ -22,6 +16,7 @@ CMS_R2_DEV_PREFIX = "cms-editor/"
 directory = "./public"
 binding = "ASSETS"
 run_worker_first = [
+  "/design-studio",
   "/dashboard",
   "/health",
   "/analytics",
@@ -29,6 +24,8 @@ run_worker_first = [
   "/api/v1",
   "/api/health",
   "/api/evals",
+  "/api/cms",
+  "/api/agent",
 ]
 
 [[d1_databases]]
