@@ -1,0 +1,65 @@
+/* ── Design Studio — Global Styles ──────────────────────────────────────── */
+/* Theme CSS variables are injected dynamically from cms_themes.css_vars_json  */
+/* via applyThemeToDom() in the Zustand store.                                  */
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  /* Fallback tokens — overwritten by active theme at runtime */
+  --color-bg:          #FAF8F5;
+  --color-bg-secondary:#F3F0EC;
+  --color-surface:     #FFFFFF;
+  --color-border:      #DCD5CC;
+  --color-text:        #4E443C;
+  --color-text-muted:  #8A7E74;
+  --color-primary:     #D97757;
+  --color-accent:      #6C8B9E;
+  --font-family:       'DM Sans', system-ui, sans-serif;
+  --font-mono:         'DM Mono', monospace;
+  --font-size-base:    13px;
+  --radius-sm:         4px;
+  --radius-md:         6px;
+  --radius-lg:         10px;
+  --shadow-sm:         0 1px 2px rgba(78,68,60,.06);
+  --shadow-md:         0 4px 12px rgba(78,68,60,.10);
+  --shadow-lg:         0 8px 32px rgba(78,68,60,.14);
+
+  /* Editor chrome — always fixed regardless of site theme */
+  --chrome-bg:         #1C1917;
+  --chrome-surface:    #28231E;
+  --chrome-border:     #3D3530;
+  --chrome-text:       #E8E0D8;
+  --chrome-text-muted: #8A7E74;
+  --chrome-accent:     #D97757;
+  --topbar-h:          48px;
+  --left-w:            260px;
+  --right-w:           280px;
+  --agent-h:           48px;
+}
+
+html, body, #root {
+  height: 100%;
+  font-family: var(--font-family);
+  font-size: var(--font-size-base);
+  background: var(--chrome-bg);
+  color: var(--chrome-text);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--chrome-border); border-radius: 2px; }
+
+/* Focus ring */
+:focus-visible { outline: 1.5px solid var(--chrome-accent); outline-offset: 2px; }
+
+button { cursor: pointer; font-family: inherit; }
+input, textarea, select { font-family: inherit; }
+
+/* Status badge colors */
+.badge-draft     { background: #3D3530; color: #D97757; }
+.badge-published { background: #1E3A2F; color: #4ADE80; }
+.badge-saved     { background: #1C2D3D; color: #60A5FA; }
+.badge-archived  { background: #2A2520; color: #8A7E74; }
+.badge-scheduled { background: #2D2A1E; color: #FACC15; }
